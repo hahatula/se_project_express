@@ -4,11 +4,22 @@
   "description": "The back-end project for the WTWR application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint ."
   },
   "author": "Olga Golubev",
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.0.2",
+    "@eslint/js": "^9.1.1",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "globals": "^15.0.0",
+    "prettier": "^3.2.5"
   }
 }
