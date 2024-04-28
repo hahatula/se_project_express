@@ -2,15 +2,18 @@
   "name": "se_project_express",
   "version": "1.0.0",
   "description": "The back-end project for the WTWR application",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "dev": "nodemon app.js"
   },
   "author": "Olga Golubev",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mongoose": "^6.6.1",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.2",
@@ -20,6 +23,9 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "globals": "^15.0.0",
-    "prettier": "^3.2.5"
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
+    "webpack-cli": "4.10.0",
+    "webpack-dev-server": "^5.0.4"
   }
 }
