@@ -7,19 +7,17 @@ const {
 
 module.exports.getItems = (req, res) => {
   ClothingItem.find({})
-    .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
-    })
     .populate(["owner", "likes"])
     .then((items) => res.status(200).send({ data: items }))
     .catch((err) => {
       console.error(err);
+      console.error(err.name);
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
 
@@ -36,22 +34,92 @@ module.exports.createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(INVALID_DATA_STATUS_CODE).send({ message: err.message });
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
       }
-      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
 
 module.exports.deleteItem = (req, res) => {
-  ClothingItem.findByIdAndRemove(req.params.id)
-    .orFail()
-    .then((item) => res.send({ data: item }))
+  const { itemId } = req.params;
+  ClothingItem.findByIdAndRemove(itemId)
+    .orFail(() => {
+      const error = new Error("Requested resource not found");
+      error.name = "NotFoundError";
+      throw error; // Remember to throw an error so .catch handles it instead of .then
+    })
+    .then((item) => res.status(200).send({}))
     .catch((err) => {
       console.error(err);
-      console.error(err.name);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === "CastError") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
+      }
+      if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
+
+module.exports.likeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { new: true },
+  )
+    .orFail(() => {
+      const error = new Error("Requested resource not found");
+      error.name = "NotFoundError";
+      throw error; // Remember to throw an error so .catch handles it instead of .then
+    })
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
+      }
+      if (err.name === "NotFoundError") {
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
+    });
+
+module.exports.dislikeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } }, // remove _id from the array
+    { new: true },
+  )
+    .orFail(() => {
+      const error = new Error("Requested resource not found");
+      error.name = "NotFoundError";
+      throw error; // Remember to throw an error so .catch handles it instead of .then
+    })
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.log(err);
+      console.log(err.name);
+      if (err.name === "CastError") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
+      }
+      if (err.name === "NotFoundError") {
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
+    });
