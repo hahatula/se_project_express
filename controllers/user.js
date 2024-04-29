@@ -1,4 +1,9 @@
 const User = require("../models/user");
+const {
+  INVALID_DATA_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
+  SERVER_ERROR_STATUS_CODE,
+} = require("../utils/errors");
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -11,9 +16,11 @@ module.exports.getUsers = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "NotFoundError") {
-        return res.status(404).send({ message: err.message });
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
 
@@ -31,12 +38,16 @@ module.exports.getUser = (req, res) => {
       console.error(err);
       console.error(err.name);
       if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
       }
       if (err.name === "NotFoundError") {
-        return res.status(404).send({ message: err.message });
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
 
@@ -48,8 +59,12 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };

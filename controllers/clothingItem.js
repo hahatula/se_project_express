@@ -1,4 +1,9 @@
 const ClothingItem = require("../models/clothingItem");
+const {
+  INVALID_DATA_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
+  SERVER_ERROR_STATUS_CODE,
+} = require("../utils/errors");
 
 module.exports.getItems = (req, res) => {
   ClothingItem.find({})
@@ -12,9 +17,9 @@ module.exports.getItems = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "NotFoundError") {
-        return res.status(404).send({ message: err.message });
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
     });
 };
 
@@ -31,9 +36,9 @@ module.exports.createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(INVALID_DATA_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
     });
 };
 
@@ -45,8 +50,8 @@ module.exports.deleteItem = (req, res) => {
       console.error(err);
       console.error(err.name);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: err.message });
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(SERVER_ERROR_STATUS_CODE).send({ message: err.message });
     });
 };
