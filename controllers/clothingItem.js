@@ -54,7 +54,7 @@ module.exports.deleteItem = (req, res) => {
       error.name = 'NotFoundError';
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then((item) => res.status(200).send({}))
+    .then(() => res.status(200).send({}))
     .catch((err) => {
       console.error(err);
       if (err.name === 'CastError') {
