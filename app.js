@@ -28,10 +28,7 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/items', require('./routes/clothingItems'));
 
-
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.listen(PORT, () => {
   console.log('Link to the server');
-  console.log(BASE_PATH);
 });
