@@ -1,7 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const router = require('express').Router();
 const {
   NOT_FOUND_STATUS_CODE,
 } = require("./utils/errors");
@@ -24,7 +23,7 @@ app.use((req, res, next) => {
 app.use("/users", require("./routes/users"));
 app.use("/items", require("./routes/clothingItems"));
 
-router.use((req, res) => res.status(NOT_FOUND_STATUS_CODE).send({ message: "Requested resource not found" }));
+app.use((req, res) => res.status(NOT_FOUND_STATUS_CODE).send({ message: "Requested resource not found" }));
 
 app.listen(PORT, () => {
   console.log("Link to the server");
