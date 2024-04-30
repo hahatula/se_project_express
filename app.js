@@ -21,7 +21,10 @@ app.use((req, res, next) => {
 app.use("/users", require("./routes/users"));
 app.use("/items", require("./routes/clothingItems"));
 
-app.use(express.static(path.join(__dirname, "public")));
+router.use((req, res) => {
+  return res.status(NOT_FOUND_STATUS_CODE).send({ message: "Requested resource not found" });
+});
+
 app.listen(PORT, () => {
   console.log("Link to the server");
 });

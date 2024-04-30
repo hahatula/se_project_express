@@ -11,13 +11,9 @@ module.exports.getItems = (req, res) => {
     .then((items) => res.status(200).send({ data: items }))
     .catch((err) => {
       console.error(err);
-      console.error(err.name);
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -36,11 +32,11 @@ module.exports.createItem = (req, res) => {
       if (err.name === "ValidationError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid data" });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -52,20 +48,20 @@ module.exports.deleteItem = (req, res) => {
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then(() => res.status(200).send({}))
+    .then(() => res.status(200).send({ message: "The item was successfully deleted." }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid data" });
       }
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -86,14 +82,14 @@ module.exports.likeItem = (req, res) =>
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid data" });
       }
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server." });
     });
 
 module.exports.dislikeItem = (req, res) =>
@@ -114,12 +110,12 @@ module.exports.dislikeItem = (req, res) =>
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: err.message });
+          .send({ message: "Invalid data" });
       }
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server." });
     });
