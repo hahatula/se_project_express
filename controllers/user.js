@@ -1,11 +1,14 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
   INVALID_DATA_STATUS_CODE,
+  AUTH_ERROR_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
   DUPLICATE_ERROR_STATUS_CODE,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -70,5 +73,21 @@ module.exports.createUser = (req, res) => {
       return res
         .status(SERVER_ERROR_STATUS_CODE)
         .send({ message: "An error has occurred on the server." });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.ststus(200).send({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      console.log(err.name);
+      res.status(AUTH_ERROR_STATUS_CODE).send({ message: err.message });
     });
 };
