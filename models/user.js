@@ -20,13 +20,14 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
     required: true,
     validate: {
       validator(value) {
         return validator.isEmail(value);
       },
-    message: "Please enter your email",
-    }
+      message: "Please enter your email",
+    },
   },
   password: {
     type: String,
@@ -35,8 +36,8 @@ const userSchema = new mongoose.Schema({
       validator(value) {
         return validator.isStrongPassword(value);
       },
-    message: "Please enter stronger password",
-    }
+      message: "Please enter stronger password",
+    },
   },
 });
 
