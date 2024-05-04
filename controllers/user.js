@@ -1,8 +1,10 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const {
   INVALID_DATA_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
+  DUPLICATE_ERROR_STATUS_CODE,
 } = require("../utils/errors");
 
 module.exports.getUsers = (req, res) => {
@@ -44,12 +46,22 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, avatar } = req.body;
-
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send({ data: user }))
+  const { name, avatar, email, password } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((user) =>
+      res
+        .status(201)
+        .send({ name: user.name, avatar: user.avatar, email: user.email })
+    )
     .catch((err) => {
       console.error(err);
+      if (err.name === "MongoServerError" && err.code === 11000) {
+        return res
+          .status(DUPLICATE_ERROR_STATUS_CODE)
+          .send({ message: "The user already exists." });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
