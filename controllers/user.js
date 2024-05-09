@@ -21,32 +21,32 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
-module.exports.getUser = (req, res) => {
-  const { userId } = req.params;
+// module.exports.getUser = (req, res) => {
+//   const { userId } = req.params;
 
-  User.findById(userId)
-    .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
-    })
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-      console.error(err.name);
-      if (err.name === "CastError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
-      }
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
+//   User.findById(userId)
+//     .orFail(() => {
+//       const error = new Error("Requested resource not found");
+//       error.name = "NotFoundError";
+//       throw error; // Remember to throw an error so .catch handles it instead of .then
+//     })
+//     .then((user) => res.status(200).send(user))
+//     .catch((err) => {
+//       console.error(err);
+//       console.error(err.name);
+//       if (err.name === "CastError") {
+//         return res
+//           .status(INVALID_DATA_STATUS_CODE)
+//           .send({ message: "Invalid data" });
+//       }
+//       if (err.name === "NotFoundError") {
+//         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+//       }
+//       return res
+//         .status(SERVER_ERROR_STATUS_CODE)
+//         .send({ message: "An error has occurred on the server." });
+//     });
+// };
 
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -78,16 +78,69 @@ module.exports.createUser = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.ststus(200).send({ token });
+      return res.status(200).send({ token });
     })
     .catch((err) => {
       console.error(err);
       console.log(err.name);
-      res.status(AUTH_ERROR_STATUS_CODE).send({ message: err.message });
+      if (err.name === "NoEmailOrPassword") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: "Invalid data" });
+      }
+      return res.status(AUTH_ERROR_STATUS_CODE).send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUser = (req, res) => {
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .orFail(() => {
+      const error = new Error("Requested resource not found");
+      error.name = "NotFoundError";
+      throw error; // Remember to throw an error so .catch handles it instead of .then
+    })
+    .then((user) => res.status(200).send(user))
+    .catch((err) => {
+      console.error(err);
+      console.error(err.name);
+      if (err.name === "CastError") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: "Invalid data" });
+      }
+      if (err.name === "NotFoundError") {
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: "An error has occurred on the server." });
+    });
+};
+
+module.exports.updateProfile = (req, res) => {
+  const { name, avatar } = req.params;
+
+  User.new({ name, avatar })
+    .then((user) =>
+      res.status(200).send({ name: user.name, avatar: user.avatar })
+    )
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+          .status(INVALID_DATA_STATUS_CODE)
+          .send({ message: "Invalid data" });
+      }
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: "An error has occurred on the server." });
     });
 };
