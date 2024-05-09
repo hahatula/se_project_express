@@ -21,33 +21,6 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
-// module.exports.getUser = (req, res) => {
-//   const { userId } = req.params;
-
-//   User.findById(userId)
-//     .orFail(() => {
-//       const error = new Error("Requested resource not found");
-//       error.name = "NotFoundError";
-//       throw error; // Remember to throw an error so .catch handles it instead of .then
-//     })
-//     .then((user) => res.status(200).send(user))
-//     .catch((err) => {
-//       console.error(err);
-//       console.error(err.name);
-//       if (err.name === "CastError") {
-//         return res
-//           .status(INVALID_DATA_STATUS_CODE)
-//           .send({ message: "Invalid data" });
-//       }
-//       if (err.name === "NotFoundError") {
-//         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-//       }
-//       return res
-//         .status(SERVER_ERROR_STATUS_CODE)
-//         .send({ message: "An error has occurred on the server." });
-//     });
-// };
-
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
@@ -88,7 +61,6 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      console.log(err.name);
       if (err.name === "NoEmailOrPassword") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
@@ -99,9 +71,9 @@ module.exports.login = (req, res) => {
 };
 
 module.exports.getCurrentUser = (req, res) => {
-  const { userId } = req.params;
+  const { _id } = req.user;
 
-  User.findById(userId)
+  User.findById(_id)
     .orFail(() => {
       const error = new Error("Requested resource not found");
       error.name = "NotFoundError";
@@ -110,7 +82,6 @@ module.exports.getCurrentUser = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      console.error(err.name);
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
@@ -126,12 +97,21 @@ module.exports.getCurrentUser = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  const { name, avatar } = req.params;
+  console.log(req.user._id);
+  const { name, avatar } = req.body;
 
-  User.new({ name, avatar })
-    .then((user) =>
-      res.status(200).send({ name: user.name, avatar: user.avatar })
-    )
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name: name, avatar: avatar },
+    {
+      new: true, // the then handler receives the updated entry as input
+      runValidators: true, // the data will be validated before the update
+      upsert: true, // if the user entry wasn't found, it will be created
+    }
+  )
+    .then((user) => {
+      res.status(200).send({ user });
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
