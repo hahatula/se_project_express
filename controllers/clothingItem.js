@@ -51,7 +51,7 @@ module.exports.deleteItem = (req, res) => {
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
     .then((item) => {
-      if (req.user._id == item.owner) {
+      if (item.owner.equals(req.user._id)) {
         item.delete().then(() => res
             .status(200)
             .send({ message: "The item was successfully deleted." }));
