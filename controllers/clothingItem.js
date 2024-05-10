@@ -3,6 +3,7 @@ const {
   INVALID_DATA_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
+  NO_PERMITION_CODE,
 } = require("../utils/errors");
 
 module.exports.getItems = (req, res) => {
@@ -42,13 +43,26 @@ module.exports.createItem = (req, res) => {
 
 module.exports.deleteItem = (req, res) => {
   const { itemId } = req.params;
-  ClothingItem.findByIdAndRemove(itemId)
+
+  ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("Requested resource not found");
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then(() => res.status(200).send({ message: "The item was successfully deleted." }))
+    .then((item) => {
+      if (req.user._id == item.owner) {
+        item.delete().then(() => {
+          return res
+            .status(200)
+            .send({ message: "The item was successfully deleted." });
+        });
+      } else {
+        const error = new Error("No permition");
+        error.name = "NoPermition";
+        throw error; // Remember to throw an error so .catch handles it instead of .then
+      }
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -58,6 +72,9 @@ module.exports.deleteItem = (req, res) => {
       }
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
+      }
+      if (err.name === "NoPermition") {
+        return res.status(NO_PERMITION_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
@@ -69,7 +86,7 @@ module.exports.likeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
-    { new: true },
+    { new: true }
   )
     .orFail(() => {
       const error = new Error("Requested resource not found");
@@ -78,7 +95,7 @@ module.exports.likeItem = (req, res) =>
     })
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
-      console.log(err);
+      console.error(err);
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
@@ -96,7 +113,7 @@ module.exports.dislikeItem = (req, res) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } }, // remove _id from the array
-    { new: true },
+    { new: true }
   )
     .orFail(() => {
       const error = new Error("Requested resource not found");
@@ -105,8 +122,7 @@ module.exports.dislikeItem = (req, res) =>
     })
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
-      console.log(err);
-      console.log(err.name);
+      console.error(err);
       if (err.name === "CastError") {
         return res
           .status(INVALID_DATA_STATUS_CODE)

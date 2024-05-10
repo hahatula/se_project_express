@@ -52,7 +52,7 @@ module.exports.createUser = (req, res) => {
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password) // method from user schema
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -97,7 +97,6 @@ module.exports.getCurrentUser = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  console.log(req.user._id);
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
