@@ -3,7 +3,7 @@ const {
   INVALID_DATA_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   SERVER_ERROR_STATUS_CODE,
-  NO_PERMITION_CODE,
+  NO_PERMISSION_CODE,
 } = require("../utils/errors");
 
 module.exports.getItems = (req, res) => {
@@ -52,14 +52,12 @@ module.exports.deleteItem = (req, res) => {
     })
     .then((item) => {
       if (req.user._id == item.owner) {
-        item.delete().then(() => {
-          return res
+        item.delete().then(() => res
             .status(200)
-            .send({ message: "The item was successfully deleted." });
-        });
+            .send({ message: "The item was successfully deleted." }));
       } else {
-        const error = new Error("No permition");
-        error.name = "NoPermition";
+        const error = new Error("No permission");
+        error.name = "NoPermission";
         throw error; // Remember to throw an error so .catch handles it instead of .then
       }
     })
@@ -73,8 +71,8 @@ module.exports.deleteItem = (req, res) => {
       if (err.name === "NotFoundError") {
         return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
       }
-      if (err.name === "NoPermition") {
-        return res.status(NO_PERMITION_CODE).send({ message: err.message });
+      if (err.name === "NoPermission") {
+        return res.status(NO_PERMISSION_CODE).send({ message: err.message });
       }
       return res
         .status(SERVER_ERROR_STATUS_CODE)
