@@ -9,7 +9,7 @@ const {
 module.exports.getItems = (req, res) => {
   ClothingItem.find({})
     .populate(["owner", "likes"])
-    .then((items) => res.status(200).send({ data: items }))
+    .then((items) => res.send({ data: items }))
     .catch((err) => {
       console.error(err);
       return res
@@ -52,9 +52,11 @@ module.exports.deleteItem = (req, res) => {
     })
     .then((item) => {
       if (item.owner.equals(req.user._id)) {
-        item.delete().then(() => res
-            .status(200)
-            .send({ message: "The item was successfully deleted." }));
+        item
+          .delete()
+          .then(() =>
+            res.send({ message: "The item was successfully deleted." })
+          );
       } else {
         const error = new Error("No permission");
         error.name = "NoPermission";
@@ -91,7 +93,7 @@ module.exports.likeItem = (req, res) =>
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -118,7 +120,7 @@ module.exports.dislikeItem = (req, res) =>
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {

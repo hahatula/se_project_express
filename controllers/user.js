@@ -10,16 +10,16 @@ const {
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
+// module.exports.getUsers = (req, res) => {
+//   User.find({})
+//     .then((users) => res.send({ data: users }))
+//     .catch((err) => {
+//       console.error(err);
+//       return res
+//         .status(SERVER_ERROR_STATUS_CODE)
+//         .send({ message: "An error has occurred on the server." });
+//     });
+// };
 
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -57,16 +57,23 @@ module.exports.login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      return res.status(200).send({ token });
+      return res.send({ token });
     })
     .catch((err) => {
       console.error(err);
+      if (err.name === "NotCorrectCredentials") {
+        return res
+          .status(AUTH_ERROR_STATUS_CODE)
+          .send({ message: "Wrong email or password" });
+      }
       if (err.name === "NoEmailOrPassword") {
         return res
           .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+          .send({ message: "No email or password" });
       }
-      return res.status(AUTH_ERROR_STATUS_CODE).send({ message: err.message });
+      return res
+        .status(SERVER_ERROR_STATUS_CODE)
+        .send({ message: err.message });
     });
 };
 
@@ -79,7 +86,7 @@ module.exports.getCurrentUser = (req, res) => {
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -105,11 +112,10 @@ module.exports.updateProfile = (req, res) => {
     {
       new: true, // the then handler receives the updated entry as input
       runValidators: true, // the data will be validated before the update
-      upsert: true, // if the user entry wasn't found, it will be created
     }
   )
     .then((user) => {
-      res.status(200).send({ user });
+      res.send({ user });
     })
     .catch((err) => {
       console.error(err);
