@@ -93,6 +93,7 @@ module.exports.likeItem = (req, res) =>
       error.name = "NotFoundError";
       throw error; // Remember to throw an error so .catch handles it instead of .then
     })
+    .populate(["owner", "likes"])
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
@@ -115,6 +116,7 @@ module.exports.dislikeItem = (req, res) =>
     { $pull: { likes: req.user._id } }, // remove _id from the array
     { new: true }
   )
+    .populate(["owner", "likes"])
     .orFail(() => {
       const error = new Error("Requested resource not found");
       error.name = "NotFoundError";
