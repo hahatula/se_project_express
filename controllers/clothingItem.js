@@ -1,24 +1,19 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  INVALID_DATA_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  NO_PERMISSION_CODE,
-} = require("../utils/errors");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const ForbiddenError = require("../utils/errors/ForbiddenError");
+const NotFoundError = require("../utils/errors/NotFoundError");
 
-module.exports.getItems = (req, res) => {
+module.exports.getItems = (req, res, next) => {
   ClothingItem.find({})
     .populate(["owner", "likes"])
     .then((items) => res.send({ data: items }))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.createItem = (req, res) => {
+module.exports.createItem = (req, res, next) => {
   const { name, weather, imageUrl, userId = req.user._id } = req.body;
 
   ClothingItem.create({
@@ -31,24 +26,18 @@ module.exports.createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.deleteItem = (req, res) => {
+module.exports.deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
+      throw new NotFoundError("Requested resource not found");
     })
     .then((item) => {
       if (item.owner.equals(req.user._id)) {
@@ -58,59 +47,38 @@ module.exports.deleteItem = (req, res) => {
             res.send({ message: "The item was successfully deleted." })
           );
       } else {
-        const error = new Error("No permission");
-        error.name = "NoPermission";
-        throw error; // Remember to throw an error so .catch handles it instead of .then
+        throw new ForbiddenError("No permission");
       }
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-      if (err.name === "NoPermission") {
-        return res.status(NO_PERMISSION_CODE).send({ message: err.message });
-      }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.likeItem = (req, res) =>
+module.exports.likeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
+      throw new NotFoundError("Requested resource not found");
     })
     .populate(["owner", "likes"])
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 
-module.exports.dislikeItem = (req, res) =>
+module.exports.dislikeItem = (req, res, next) =>
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } }, // remove _id from the array
@@ -118,22 +86,13 @@ module.exports.dislikeItem = (req, res) =>
   )
     .populate(["owner", "likes"])
     .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
+      throw new NotFoundError("Requested resource not found");
     })
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });

@@ -2,7 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { NOT_FOUND_STATUS_CODE } = require("./utils/errors");
+const { NOT_FOUND_STATUS_CODE } = require("./utils/errors/errors");
+const errorHandler = require("./middlewares/error-handler");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -19,6 +20,8 @@ app.use((req, res) =>
     .status(NOT_FOUND_STATUS_CODE)
     .send({ message: "Requested resource not found" })
 );
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log("Link to the server");

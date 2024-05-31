@@ -1,13 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const {
-  INVALID_DATA_STATUS_CODE,
-  AUTH_ERROR_STATUS_CODE,
-  NOT_FOUND_STATUS_CODE,
-  SERVER_ERROR_STATUS_CODE,
-  DUPLICATE_ERROR_STATUS_CODE,
-} = require("../utils/errors");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const ConflictError = require("../utils/errors/ConflictError");
 const { JWT_SECRET } = require("../utils/config");
 
 // module.exports.getUsers = (req, res) => {
@@ -15,13 +12,11 @@ const { JWT_SECRET } = require("../utils/config");
 //     .then((users) => res.send({ data: users }))
 //     .catch((err) => {
 //       console.error(err);
-//       return res
-//         .status(SERVER_ERROR_STATUS_CODE)
-//         .send({ message: "An error has occurred on the server." });
+//       return next(err);
 //     });
 // };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 10)
@@ -34,22 +29,16 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "MongoServerError" && err.code === 11000) {
-        return res
-          .status(DUPLICATE_ERROR_STATUS_CODE)
-          .send({ message: "The user already exists." });
+        return next(new ConflictError("The user already exists."));
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password) // method from user schema
@@ -62,48 +51,33 @@ module.exports.login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "NotCorrectCredentials") {
-        return res
-          .status(AUTH_ERROR_STATUS_CODE)
-          .send({ message: "Wrong email or password" });
+        return next(new UnauthorizedError("Wrong email or password"));
       }
       if (err.name === "NoEmailOrPassword") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "No email or password" });
+        return next(new BadRequestError("No email or password"));
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: err.message });
+      return next(err);
     });
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById(_id)
     .orFail(() => {
-      const error = new Error("Requested resource not found");
-      error.name = "NotFoundError";
-      throw error; // Remember to throw an error so .catch handles it instead of .then
+      throw new NotFoundError("Requested resource not found");
     })
     .then((user) => res.send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      if (err.name === "NotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: err.message });
-      }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -120,12 +94,8 @@ module.exports.updateProfile = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(INVALID_DATA_STATUS_CODE)
-          .send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
-      return res
-        .status(SERVER_ERROR_STATUS_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
