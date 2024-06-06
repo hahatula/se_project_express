@@ -20,7 +20,7 @@ module.exports.validateCardBody = celebrate({
       "string.empty": 'The "imageUrl" field must be filled in',
       "string.uri": 'The "imageUrl" field must be a valid url',
     }),
-  }),
+  }).unknown(true),
 });
 
 module.exports.validateUserBody = celebrate({
@@ -58,7 +58,7 @@ module.exports.validateUserLogin = celebrate({
 
 module.exports.validateId = celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().alphanum().length(24),
+    itemId: Joi.string().alphanum().length(24),
     userId: Joi.string().alphanum().length(24),
   }),
 });

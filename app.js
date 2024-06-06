@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const { NOT_FOUND_STATUS_CODE } = require("./utils/errors/errors");
 const errorHandler = require("./middlewares/error-handler");
+const { errors } = require('celebrate');
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -21,6 +22,8 @@ app.use((req, res) =>
     .send({ message: "Requested resource not found" })
 );
 
+// error handlers
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT, () => {
