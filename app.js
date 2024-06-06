@@ -5,6 +5,7 @@ const cors = require("cors");
 const { NOT_FOUND_STATUS_CODE } = require("./utils/errors/errors");
 const errorHandler = require("./middlewares/error-handler");
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(requestLogger);
 app.use("/", require("./routes/index"));
 
 app.use((req, res) =>
@@ -22,6 +24,7 @@ app.use((req, res) =>
     .send({ message: "Requested resource not found" })
 );
 
+app.use(errorLogger);
 // error handlers
 app.use(errors());
 app.use(errorHandler);
