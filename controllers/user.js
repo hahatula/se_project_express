@@ -5,7 +5,7 @@ const BadRequestError = require("../utils/errors/BadRequestError");
 const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 const NotFoundError = require("../utils/errors/NotFoundError");
 const ConflictError = require("../utils/errors/ConflictError");
-const { JWT_SECRET } = require("../utils/config");
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // module.exports.getUsers = (req, res) => {
 //   User.find({})
@@ -43,7 +43,7 @@ module.exports.login = (req, res, next) => {
 
   User.findUserByCredentials(email, password) // method from user schema
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', {
         expiresIn: "7d",
       });
       return res.send({ token });
