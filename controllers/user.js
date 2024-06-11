@@ -5,6 +5,7 @@ const BadRequestError = require("../utils/errors/BadRequestError");
 const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 const NotFoundError = require("../utils/errors/NotFoundError");
 const ConflictError = require("../utils/errors/ConflictError");
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 // module.exports.getUsers = (req, res) => {
