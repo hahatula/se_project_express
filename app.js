@@ -13,6 +13,11 @@ mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 const { PORT = 3001 } = process.env;
 const app = express();
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Server will crash now');
+  }, 0);
+});
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -1,5 +1,5 @@
 # WTWR (What to Wear?): Back End
-The back-end for the WTWR application (https://hahatula.github.io/se_project_react) — weather-appropriate clothing app.
+The back-end for the WTWR application wtwr.xyz — weather-appropriate clothing app.
 
 ## Technologies
 * Express.js
