@@ -15,12 +15,12 @@ module.exports.validateCardBody = celebrate({
       "string.max": 'The maximum length of the "name" field is 30',
       "string.empty": 'The "name" field must be filled in',
     }),
-
     imageUrl: Joi.string().custom(validateURL).required().messages({
       "string.empty": 'The "imageUrl" field must be filled in',
       "string.uri": 'The "imageUrl" field must be a valid url',
     }),
-  }).unknown(true),
+    weather: Joi.string().valid('hot', 'warm', 'cold').required(),
+  }),
 });
 
 module.exports.validateUserBody = celebrate({
@@ -73,6 +73,5 @@ module.exports.validateUserLogin = celebrate({
 module.exports.validateId = celebrate({
   params: Joi.object().keys({
     itemId: Joi.string().alphanum().length(24),
-    userId: Joi.string().alphanum().length(24),
   }),
 });

@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 require('dotenv').config();
 const cors = require("cors");
 const { errors } = require("celebrate");
-const { NOT_FOUND_STATUS_CODE } = require("./utils/errors/errors");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
@@ -23,12 +22,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use("/", require("./routes/index"));
-
-app.use((req, res) =>
-  res
-    .status(NOT_FOUND_STATUS_CODE)
-    .send({ message: "Requested resource not found" })
-);
 
 app.use(errorLogger);
 // error handlers
