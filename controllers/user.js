@@ -18,14 +18,14 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 // };
 
 module.exports.createUser = (req, res, next) => {
-  const { name, avatar, email, password } = req.body;
+  const { name, avatar, email, password, city } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((hash) => User.create({ name, avatar, email, password: hash, city }))
     .then((user) =>
       res
         .status(201)
-        .send({ name: user.name, avatar: user.avatar, email: user.email })
+        .send({ name: user.name, avatar: user.avatar, email: user.email, city: user.city })
     )
     .catch((err) => {
       console.error(err);
@@ -83,11 +83,11 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.updateProfile = (req, res, next) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, city } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name, avatar },
+    { name, avatar, city },
     {
       new: true, // the then handler receives the updated entry as input
       runValidators: true, // the data will be validated before the update

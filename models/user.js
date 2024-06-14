@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
       message: "Please enter stronger password",
     },
   },
+  city: {
+    type: String,
+    minlength: 2,
+    required: true,
+  },
 });
 
 userSchema.statics.findUserByCredentials = function findUserByCredentials(
