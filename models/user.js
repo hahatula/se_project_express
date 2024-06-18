@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
+const coordinatesSchema = new mongoose.Schema({
+  lat: {
+    type: Number,
+    required: true,
+  },
+  lng: {
+    type: Number,
+    required: true,
+  },
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -44,6 +55,10 @@ const userSchema = new mongoose.Schema({
   city: {
     type: String,
     minlength: 2,
+    required: true,
+  },
+  coordinates: {
+    type: coordinatesSchema,
     required: true,
   },
 });

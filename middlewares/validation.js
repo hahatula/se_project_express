@@ -45,6 +45,19 @@ module.exports.validateUserBody = celebrate({
       "string.min": 'The minimum length of the "city" field is 2',
       "string.empty": 'The "city" field must be filled in',
     }),
+    coordinates: Joi.object().keys({
+      lat: Joi.number().required().messages({
+        "number.base": 'The "lat" field must be a number',
+        "any.required": 'The "lat" field is required',
+      }),
+      lng: Joi.number().required().messages({
+        "number.base": 'The "lng" field must be a number',
+        "any.required": 'The "lng" field is required',
+      }),
+    }).required().messages({
+      "object.base": 'The "coordinates" field must be an object',
+      "any.required": 'The "coordinates" field is required',
+    }),
   }),
 });
 
@@ -62,6 +75,19 @@ module.exports.validateUserUpdate = celebrate({
     city: Joi.string().min(2).required().messages({
       "string.min": 'The minimum length of the "city" field is 2',
       "string.empty": 'The "city" field must be filled in',
+    }),
+    coordinates: Joi.object().keys({
+      lat: Joi.number().required().messages({
+        "number.base": 'The "lat" field must be a number',
+        "any.required": 'The "lat" field is required',
+      }),
+      lng: Joi.number().required().messages({
+        "number.base": 'The "lng" field must be a number',
+        "any.required": 'The "lng" field is required',
+      }),
+    }).required().messages({
+      "object.base": 'The "coordinates" field must be an object',
+      "any.required": 'The "coordinates" field is required',
     }),
   }),
 });
