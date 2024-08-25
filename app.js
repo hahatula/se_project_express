@@ -9,10 +9,10 @@ const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 const { limiter } = require("./middlewares/limiter");
 
+const { MONGO_URI } = process.env;
+
 // mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
-mongoose.connect(
-  "mongodb+srv://olgagolubevpro:DvqKlZUzmP6jafjl@cluster0.eqaqe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-);
+mongoose.connect(MONGO_URI);
 
 //change port to 3001 to run locally
 const { PORT = 3000 } = process.env;
